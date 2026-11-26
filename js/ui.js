@@ -1,0 +1,15 @@
+import {displayValue} from './model.js';
+export const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const button=(label,act,id='',cls='')=>`<button type="button" class="${cls}" data-act="${act}" data-id="${esc(id)}">${esc(label)}</button>`;
+export const empty=t=>`<div class="empty">${esc(t)}</div>`;
+export const field=(label,html)=>`<label class="field">${esc(label)}${html}</label>`;
+export const input=(name,value='',type='text',extra='')=>`<input name="${esc(name)}" type="${type}" value="${esc(value)}" ${extra}>`;
+export const textarea=(name,value='',extra='')=>`<textarea name="${esc(name)}" ${extra}>${esc(value)}</textarea>`;
+export const select=(name,opts,value='',extra='')=>`<select name="${esc(name)}" ${extra}>${opts.map(([v,t])=>`<option value="${esc(v)}" ${String(v)===String(value)?'selected':''}>${esc(t)}</option>`).join('')}</select>`;
+export const table=(headers,rows)=>`<div class="scroll"><table class="table"><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+export const pill=(r,l)=>`<span class="pill ${l==='natural'?'natural':'adapted'}">${esc(r)} · ${l==='natural'?'N':'A'}</span>`;
+export const statsInput=(f,value)=>f.type==='number'?input('v_'+f.id,value??'','number','step="any"'):f.type==='select'?select('v_'+f.id,[['','—'],...(value&&!f.options.includes(value)?[[value,value+' (storico)']]:[]),...f.options.map(x=>[x,x])],value??''):f.type==='boolean'?select('v_'+f.id,[['','—'],['true','Sì'],['false','No']],value??''):input('v_'+f.id,value??'','text','maxlength="500"');
+export function readValues(form,fields){return Object.fromEntries(fields.map(f=>{const x=form.get('v_'+f.id);return [f.id,x===''||x===null?null:f.type==='number'?Number(x):f.type==='boolean'?x==='true':x]}))}
+export function modal(title,html,save){const d=document.querySelector('#dialog');d.innerHTML=`<div class="line between"><h2>${esc(title)}</h2><button type="button" id="close-dialog" aria-label="Chiudi">✕</button></div><div class="spacer"></div><form class="stack">${html}${save?'<div class="actions"><button type="submit" class="primary">Salva</button><button type="button" id="cancel-dialog">Annulla</button></div>':''}</form>`;d.querySelector('#close-dialog').onclick=()=>d.close();if(save){d.querySelector('#cancel-dialog').onclick=()=>d.close();d.querySelector('form').onsubmit=async e=>{e.preventDefault();const submit=e.currentTarget.querySelector('[type=submit]');submit.disabled=true;try{await save(new FormData(e.currentTarget),e.currentTarget);d.close();toast('Salvato.')}catch(err){toast(err.message||String(err),true);submit.disabled=false}}}if(!d.open)d.showModal();}
+let timer;export function toast(msg,error=false){const t=document.querySelector('#toast');t.textContent=msg;t.className=error?'error':'';t.style.display='block';clearTimeout(timer);timer=setTimeout(()=>t.style.display='none',5500)}
+export const valueHTML=v=>esc(displayValue(v));

@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null && request.auth.token.email_verified == true; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function member() { return signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && profile().role in ['admin','captain','staff','player']; }
+    function admin() { return member() && profile().role == 'admin'; }
+    function staff() { return member() && profile().role in ['admin','captain','staff']; }
+    match /users/{id} {
+      allow get: if signed() && (request.auth.uid == id || admin());
+      allow list: if admin();
+      allow create: if signed() && request.auth.uid == id && request.resource.data.keys().hasOnly(['email','name','role','playerId','createdAt']) && request.resource.data.email == request.auth.token.email && request.resource.data.role == 'pending' && request.resource.data.playerId == '';
+      allow update: if admin() && request.resource.data.role in ['admin','captain','staff','player','pending'] && request.resource.data.email == resource.data.email && (request.auth.uid != id || request.resource.data.role == 'admin');
+      allow delete: if false;
+    }
+    match /players/{id} { allow read: if member(); allow create, update: if staff(); allow delete: if false; }
+    match /fields/{id} { allow read: if member(); allow create, update: if admin(); allow delete: if false; }
+    match /matches/{id} { allow read: if member(); allow create, update: if staff(); allow delete: if false; }
+    match /records/{id} { allow read: if member(); allow create, update, delete: if staff(); }
+    match /formations/{id} { allow read: if member(); allow create: if staff() && request.resource.data.status == 'draft'; allow update: if staff() && (request.resource.data.status == 'draft' || (profile().role in ['admin','captain'] && request.resource.data.status == 'approved')); allow delete: if false; }
+    match /staffNotes/{id} { allow read: if staff(); allow create, update: if staff(); allow delete: if false; }
+    match /availability/{id} {
+      allow read: if member();
+      function ownAvailability() { return member() && profile().playerId != '' && request.resource.data.playerId == profile().playerId && id == request.resource.data.matchId + '_' + request.resource.data.playerId && request.resource.data.keys().hasOnly(['matchId','playerId','status','note','updatedAt']) && request.resource.data.status in ['yes','maybe','no','pending'] && exists(/databases/$(database)/documents/matches/$(request.resource.data.matchId)) && get(/databases/$(database)/documents/matches/$(request.resource.data.matchId)).data.status == 'planned'; }
+      allow create: if staff() || ownAvailability();
+      allow update: if staff() || (ownAvailability() && resource.data.playerId == profile().playerId && resource.data.matchId == request.resource.data.matchId);
+      allow delete: if staff();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
