@@ -15,7 +15,23 @@ export async function cloudStore(){
  const ref=(name,id)=>c.doc(db,name,id);
  return {demo:false,
   authWatch:fn=>b.onAuthStateChanged(auth,fn),login:()=>b.signInWithPopup(auth,new b.GoogleAuthProvider()),logout:()=>b.signOut(auth),
-  async ensureProfile(user){const r=ref('users',user.uid),s=await c.getDoc(r);if(!s.exists())await c.setDoc(r,{name:user.displayName||user.email,email:user.email,role:'pending',playerId:'',createdAt:new Date().toISOString()});},
+  async ensureProfile(user){
+   let token;
+   try { token=await b.getIdTokenResult(user,true); }
+   catch(e){throw new Error('Aggiornamento sessione Google: '+(e.message||String(e)));}
+   const r=ref('users',user.uid);let s;
+   try {s=await c.getDocFromServer(r);}
+   catch(e){throw new Error('Lettura del profilo: '+(e.message||String(e)));}
+   if(s.exists())return;
+   const email=token.claims.email;
+   if(typeof email!=='string'||!email)throw new Error('Il token Google non contiene un indirizzo email.');
+   try {await c.setDoc(r,{name:user.displayName||email,email,role:'pending',playerId:'',createdAt:new Date().toISOString()});}
+   catch(e){
+    // Another tab may have created the profile in the meantime.
+    try {if((await c.getDocFromServer(r)).exists())return;}catch(_){}
+    throw new Error('Creazione del profilo in attesa: '+(e.message||String(e)));
+   }
+  },
   profileWatch:(id,fn,err)=>c.onSnapshot(ref('users',id),s=>fn(s.exists()?{id:s.id,...s.data()}:null),err),
   listen(names,fn,err){let data=Object.fromEntries(COLLECTIONS.map(k=>[k,[]]));let loaded=new Set();let off=names.map(name=>c.onSnapshot(c.collection(db,name),s=>{data[name]=s.docs.map(d=>({id:d.id,...d.data()}));loaded.add(name);if(loaded.size===names.length)fn(structuredClone(data));},err));return()=>off.forEach(f=>f());},
   async put(name,id,value){await c.setDoc(ref(name,id),value,{merge:true})},
