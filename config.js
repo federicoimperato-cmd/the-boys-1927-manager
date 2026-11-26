@@ -6,6 +6,4 @@ export const firebaseConfig = {
   messagingSenderId: "901760508229",
   appId: "1:901760508229:web:86d33d415533b99ffc9e2c",
   measurementId: "G-8EBF2RFF9G"
-};// Sostituisci l'oggetto vuoto con firebaseConfig fornito dalla console Firebase.
-// Non inserire password, token privati o chiavi di service account.
-export const firebaseConfig = {};
+};
