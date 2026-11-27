@@ -21,9 +21,16 @@ service cloud.firestore {
     match /staffNotes/{id} { allow read: if staff(); allow create, update: if staff(); allow delete: if false; }
     match /availability/{id} {
       allow read: if member();
-      function ownAvailability() { return member() && profile().playerId != '' && request.resource.data.playerId == profile().playerId && id == request.resource.data.matchId + '_' + request.resource.data.playerId && request.resource.data.keys().hasOnly(['matchId','playerId','status','note','updatedAt']) && request.resource.data.status in ['yes','maybe','no','pending'] && exists(/databases/$(database)/documents/matches/$(request.resource.data.matchId)) && get(/databases/$(database)/documents/matches/$(request.resource.data.matchId)).data.status == 'planned'; }
+      function ownAvailability() { return member() && profile().playerId != '' && request.resource.data.playerId == profile().playerId && id == request.resource.data.matchId + '_' + request.resource.data.playerId && request.resource.data.keys().hasOnly(['matchId','playerId','status','note','updatedAt','eventSchedule']) && request.resource.data.status in ['yes','maybe','no','pending'] && exists(/databases/$(database)/documents/matches/$(request.resource.data.matchId)) && get(/databases/$(database)/documents/matches/$(request.resource.data.matchId)).data.status == 'planned'; }
       allow create: if staff() || ownAvailability();
       allow update: if staff() || (ownAvailability() && resource.data.playerId == profile().playerId && resource.data.matchId == request.resource.data.matchId);
+      allow delete: if staff();
+    }
+    match /dailyAvailability/{id} {
+      allow read: if member();
+      function validOwnDay() { return member() && profile().playerId != '' && request.resource.data.playerId == profile().playerId && id == request.resource.data.date + '_' + profile().playerId && request.resource.data.keys().hasOnly(['date','playerId','status','from','to','updatedAt']) && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') && request.resource.data.status in ['yes','maybe','no'] && request.resource.data.from is string && request.resource.data.to is string; }
+      allow create: if staff() || validOwnDay();
+      allow update: if staff() || (validOwnDay() && resource.data.playerId == profile().playerId && resource.data.date == request.resource.data.date);
       allow delete: if staff();
     }
     match /{document=**} { allow read, write: if false; }
