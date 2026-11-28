@@ -43,6 +43,16 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/dailyAvailability/$(request.resource.data.date + '_' + request.resource.data.playerId)).data.updatedAt == request.resource.data.updatedAt;
       allow update, delete: if false;
     }
+    match /profiles/{id} {
+      allow read: if member();
+      allow create, update: if staff() || (member() && profile().playerId == id && id != '' && request.resource.data.keys().hasOnly(['height','weight','gamertag','platform','archetype','foot','styles','plus','preferred','builds']));
+      allow delete: if false;
+    }
+    match /proFeedback/{id} {
+      allow read: if staff();
+      allow create: if member() && profile().playerId != '' && request.resource.data.playerId == profile().playerId && request.resource.data.keys().hasOnly(['playerId','body','kind','createdAt']) && request.resource.data.body is string && request.resource.data.body.size() <= 2000 && request.resource.data.kind in ['feedback','highlight'];
+      allow update, delete: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

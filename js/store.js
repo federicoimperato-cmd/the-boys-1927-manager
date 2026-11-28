@@ -1,6 +1,6 @@
 import {firebaseConfig} from '../config.js';
 import {DEFAULT_FIELDS,uid,today} from './model.js';
-export const COLLECTIONS=['players','fields','matches','records','formations','availability','dailyAvailability','availabilityHistory','staffNotes','users'];
+export const COLLECTIONS=['players','fields','matches','records','formations','availability','dailyAvailability','availabilityHistory','staffNotes','users','profiles','proFeedback'];
 const DEMO_KEY='the-boys-1927-demo-v1';
 export function demoStore(){
  let data;try{data=JSON.parse(localStorage.getItem(DEMO_KEY))}catch{};
