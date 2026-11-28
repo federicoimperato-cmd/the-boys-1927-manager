@@ -10,3 +10,6 @@
 #dialog:has(#edit-pitch) form>.actions:last-child{position:sticky;bottom:-12px;background:var(--panel);padding:10px 0 4px;box-shadow:0 -8px 15px var(--panel);z-index:5}#dialog:has(#edit-pitch) form>.actions:last-child .primary{flex:1;min-height:44px}
 
 .whatsapp{background:#16783e!important;color:white!important;}
+
+/* V2.3 */
+.roster-row{grid-template-columns:minmax(0,1fr) repeat(4,minmax(34px,58px));gap:5px}.profile-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.role-coverage{padding:8px 0}.role-coverage summary{cursor:pointer}@media(max-width:600px){.roster-row{grid-template-columns:minmax(0,1fr) repeat(4,32px);gap:3px;font-size:12px}.profile-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -33,6 +33,16 @@ service cloud.firestore {
       allow update: if staff() || (validOwnDay() && resource.data.playerId == profile().playerId && resource.data.date == request.resource.data.date);
       allow delete: if staff();
     }
+    match /availabilityHistory/{id} {
+      allow read: if staff();
+      allow create: if member() && (staff() || (profile().playerId != '' && request.resource.data.playerId == profile().playerId))
+        && request.resource.data.keys().hasOnly(['date','playerId','previous','current','updatedAt'])
+        && request.resource.data.date is string && request.resource.data.playerId is string
+        && request.resource.data.current is map
+        && getAfter(/databases/$(database)/documents/dailyAvailability/$(request.resource.data.date + '_' + request.resource.data.playerId)).data.status == request.resource.data.current.status
+        && getAfter(/databases/$(database)/documents/dailyAvailability/$(request.resource.data.date + '_' + request.resource.data.playerId)).data.updatedAt == request.resource.data.updatedAt;
+      allow update, delete: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }
