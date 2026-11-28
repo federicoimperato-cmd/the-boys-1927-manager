@@ -13,7 +13,7 @@ export const sortName=(a,b)=>(a.name||'').localeCompare(b.name||'','it');
 export const uid=()=>crypto.randomUUID();
 export const today=()=>{let d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
 export const activeFields=(fields,scope)=>fields.filter(f=>!f.archived&&(!scope||f.scope===scope)).sort((a,b)=>(a.order||0)-(b.order||0)||sortName(a,b));
-export function matchRecords(data,playerId){const done=new Set(data.matches.filter(m=>m.status==='played').map(m=>m.id));return data.records.filter(r=>r.playerId===playerId&&done.has(r.matchId)&&r.appeared!==false)}
+export function matchRecords(data,playerId){const done=new Set(data.matches.filter(m=>m.status==='played'&&(!m.kind||['match','friendly','tournament'].includes(m.kind))).map(m=>m.id));return data.records.filter(r=>r.playerId===playerId&&done.has(r.matchId)&&r.appeared!==false)}
 export function aggregate(data,p,f){if(f.scope==='player')return p.values?.[f.id]??null;const nums=matchRecords(data,p.id).map(r=>r.values?.[f.id]).filter(v=>typeof v==='number'&&Number.isFinite(v));if(!nums.length)return null;return f.aggregation==='avg'?Math.round(nums.reduce((a,b)=>a+b,0)/nums.length*100)/100:nums.reduce((a,b)=>a+b,0)}
 export function teamStats(matches){const m=matches.filter(x=>x.status==='played'&&typeof x.gf==='number'&&typeof x.ga==='number');return {n:m.length,w:m.filter(x=>x.gf>x.ga).length,d:m.filter(x=>x.gf===x.ga).length,l:m.filter(x=>x.gf<x.ga).length,gf:m.reduce((s,x)=>s+x.gf,0),ga:m.reduce((s,x)=>s+x.ga,0)}}
 export const recordId=(matchId,playerId)=>`${matchId}_${playerId}`;

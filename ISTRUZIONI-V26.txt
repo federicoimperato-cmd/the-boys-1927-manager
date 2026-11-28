@@ -1,0 +1,15 @@
+THE BOYS 1927 MANAGER — V2.6 COMPLETE EDITION
+
+AGGIORNAMENTO DI UN REPOSITORY ESISTENTE (non installazione da zero)
+1. Prima di pubblicare le regole, accedere alla V2.5 come amministratore e scaricare il backup JSON da Utenti e permessi. Conservare anche il commit GitHub e le vecchie regole. Non condividere il backup.
+2. Avvisare staff e giocatori di non modificare dati durante l'aggiornamento. Chiudere le altre schede del gestionale.
+3. Pubblicare il nuovo firestore.rules dalla console Firebase, nel progetto The Boys 1927.
+4. Caricare il contenuto dello ZIP nella radice del repository esistente, mantenendo le cartelle assets e js. Non sostituire né eliminare config.js: non è incluso nell'aggiornamento.
+5. Dopo la pubblicazione GitHub Pages, aprire la webapp e ricaricare con Ctrl+F5. Accedere come amministratore. Da Area staff usare Migrazione valutazioni riservate, confermare una sola volta e non interrompere l'operazione. Fino al completamento, l'accesso ai dati principali è bloccato per gli account giocatore.
+6. Verificare che compaia Protezione valutazioni attiva. Controllare che le valutazioni esistenti siano ancora visibili allo staff. Provare con un account giocatore e con un account staff: non basta controllare l'interfaccia, verificare anche le regole con il simulatore Firebase o l'emulatore.
+7. Verificare una disponibilità, un report, una votazione, una foto e la condivisione su smartphone.
+
+La migrazione trasferisce note, valutazioni e definizioni dei campi non pubblici nelle collezioni private. Gol, assist e caratteristiche esplicitamente autorizzate rimangono condivisi. Le istruzioni tattiche generali pubblicate nel programma giornaliero e nelle formazioni restano condivise intenzionalmente. Non è possibile revocare eventuali copie di dati già scaricate prima della migrazione.
+Le foto sono ridimensionate e salvate nel profilo condiviso. I voti MVP individuali sono leggibili dal votante e dallo staff; gli altri giocatori vedono il risultato finale. Le autovalutazioni sono visibili soltanto al giocatore interessato e allo staff. I trofei vengono registrati definitivamente quando lo staff è online; la data è ricavata dallo storico disponibile. Le regole dei nuovi trofei e delle edizioni sono soglie proposte. La condivisione di file dipende dal browser, con download come alternativa.
+
+Collaudo: sintassi JavaScript e simulazione locale con dati fittizi (rendering, migrazione, report, percentuali, imbattibilità, trofei, MVP). Il browser locale ha bloccato il test HTTP; non sono stati verificati Firebase reale, le regole nell'emulatore, il rendering grafico finale o WhatsApp reale. Non considerare la migrazione collaudata in produzione prima di avere eseguito i controlli sopra.
